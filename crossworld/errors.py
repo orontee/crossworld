@@ -8,3 +8,7 @@ class CrosswordNotFoundError(ApplicationError):
 
 class FileAlreadyExistError(ApplicationError):
     pass
+
+
+class CredentialsNotFound(ApplicationError):
+    pass

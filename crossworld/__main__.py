@@ -3,10 +3,11 @@ import logging
 from pathlib import Path
 import re
 import sys
-from typing import AnyStr, List
+from typing import List
 
 from tqdm import tqdm
 
+from .download import download_newspapers
 from .errors import ApplicationError, CrosswordNotFoundError
 from .extract import extract_crossword
 
@@ -21,10 +22,16 @@ def is_valid_path(p: Path) -> bool:
 
 def get_parser() -> argparse.ArgumentParser:
     desc = 'Extract crossword from Le Monde newspaper'
-    parser = argparse.ArgumentParser(description=desc)
+    parser = argparse.ArgumentParser(description=desc,
+                                     prog='python -m crossworld')
 
-    parser.add_argument('files', type=str, nargs='+',
-                        help='Files or directories to process')
+    parser.add_argument('files', type=str, nargs='*',
+                        help='Files or directories to process '
+                        '(disable newspapers download when specified)')
+
+    parser.add_argument('--max-download', type=int, default=10,
+                        dest='max_download',
+                        help='Max number of newspapers to download')
 
     output_help = 'Output directory (default to current directory)'
     parser.add_argument('-o,--output', type=Path, default=Path.cwd(),
@@ -42,8 +49,9 @@ def configure_logger(args):
     ch.setFormatter(formatter)
     level = logging.DEBUG if args.debug is True else logging.ERROR
     ch.setLevel(level)
-    LOGGER.setLevel(level)
-    LOGGER.addHandler(ch)
+    logger = logging.getLogger('crossworld')
+    logger.setLevel(level)
+    logger.addHandler(ch)
 
 
 def collect_pdf_paths(input_files: List[str]) -> List[Path]:
@@ -69,8 +77,14 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     configure_logger(args)
+    files = args.files if args.files \
+        else download_newspapers(limit=args.max_download)
 
-    paths = collect_pdf_paths(args.files)
+    paths = collect_pdf_paths(files)
+    if not len(paths):
+        LOGGER.debug('Nothing to process')
+        sys.exit(1)
+
     LOGGER.debug(f'Found {len(paths)} files to process')
 
     output_path = args.output_path

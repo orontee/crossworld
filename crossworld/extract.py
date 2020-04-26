@@ -21,7 +21,7 @@ def extract_crossword(file_path: Path, output_path: Path,
     Open a PDF document, search for a string identifying Le Monde
     crossword, and save the corresponding page to a file.
 
-    Arguments:
+    Args:
       file_path: Path of the PDF document to process
 
       output_path: Path of the output directory
@@ -33,14 +33,14 @@ def extract_crossword(file_path: Path, output_path: Path,
 
     """
     LOGGER.debug(f'Processing {file_path}')
-    max_extracted_pages = 10
+    max_extracted_pages = 15
     pattern = 'GRILLE N° ([0-9]{2} - [0-9]{3})'
     rsrcmgr = PDFResourceManager(caching=True)
     crossword_page = None
     m = None
     with open(file_path, 'rb') as f:
         pages = [page for page in PDFPage.get_pages(f)]
-        first_checked_pageno = len(pages) - max_extracted_pages
+        first_checked_pageno = max(0, len(pages) - max_extracted_pages)
         for i, page in enumerate(pages[first_checked_pageno:]):
             text = StringIO()
             device = TextConverter(rsrcmgr, text, codec='utf-8',
