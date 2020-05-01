@@ -104,7 +104,7 @@ if __name__ == '__main__':
                     crossword_path = extract_crossword(p, output_path)
                     generated.append(crossword_path)
                 except IOError:
-                    msg = f'Failed to extract crossword from {crossword_path}'
+                    msg = f'Failed to extract crossword from {p}'
                     raise ApplicationError(msg)
                 except CrosswordNotFoundError:
                     not_found.append(p)
