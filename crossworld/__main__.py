@@ -34,7 +34,7 @@ def get_parser() -> argparse.ArgumentParser:
                         help='Max number of newspapers to download')
 
     output_help = 'Output directory (default to current directory)'
-    parser.add_argument('-o,--output', type=Path, default=Path.cwd(),
+    parser.add_argument('-o', '--output', type=Path, default=Path.cwd(),
                         dest='output_path', help=output_help)
 
     parser.add_argument('--debug', action='store_true',
