@@ -15,7 +15,7 @@ from .errors import CrosswordNotFoundError, FileAlreadyExistError
 
 LOGGER = logging.getLogger(__name__)
 
-_PATTERN = 'GRILLE N° ([0-9]{2} - [0-9]{3})'
+_PATTERN = '[^ ]GRILLE N° ([0-9]{2} - [0-9]{3})'
 
 
 def _search_in_page(page: PDFDocument,
