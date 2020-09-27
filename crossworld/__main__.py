@@ -40,6 +40,9 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument('--debug', action='store_true',
                         help='Enable debug logs')
 
+    parser.add_argument('--no-headless', action='store_true',
+                        help='Don\'t use a headless web browser')
+
     return parser
 
 
@@ -47,7 +50,7 @@ def configure_logger(args):
     ch = logging.StreamHandler()
     formatter = logging.Formatter('%(levelname)s: %(message)s')
     ch.setFormatter(formatter)
-    level = logging.DEBUG if args.debug is True else logging.ERROR
+    level = logging.DEBUG if args.debug is True else logging.INFO
     ch.setLevel(level)
     logger = logging.getLogger('crossworld')
     logger.setLevel(level)
@@ -78,7 +81,8 @@ if __name__ == '__main__':
 
     configure_logger(args)
     files = args.files if args.files \
-        else download_newspapers(limit=args.max_download)
+        else download_newspapers(limit=args.max_download,
+                                 headless=not args.no_headless)
 
     paths = collect_pdf_paths(files)
     if not len(paths):

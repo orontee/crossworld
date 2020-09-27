@@ -21,6 +21,8 @@ _month_names = ('janvier', 'février', 'mars', 'avril', 'mai', 'juin',
                 'juillet', 'août', 'septembre', 'octobre', 'novembre',
                 'décembre')
 
+_download_base_path = Path('~/Téléchargements').expanduser()
+
 
 def _read_credentials() -> Credentials:
     """Read credentials from Freedesktop.org SecretService standard."""
@@ -57,19 +59,29 @@ def _connect(driver: WebDriver, creds: Credentials):
 
 def _get_file_path(newspaper_date: date) -> Path:
     prefix = newspaper_date.strftime('%Y%m%d')
-    base_path = Path('~/Téléchargements').expanduser()
-    return base_path / f'{prefix}_Le Monde.pdf'
+    return _download_base_path / f'{prefix}_Le Monde.pdf'
 
 
-def download_newspapers(*, limit: int):
+def download_newspapers(*, limit: int, headless: bool):
     """Download newspapers in PDF format.
 
     Args:
         limit: Max number of newspaper to download
 
+        headless: Whether to use a headless web browser
+
     """
     options = webdriver.ChromeOptions()
-    # options.add_argument("headless")
+    if headless:
+        LOGGER.debug('Configuring web browser to be headless')
+        options.add_argument('headless')
+        options.add_argument('disable-gpu')
+        options.add_argument('window-size=1400,2100')
+        prefs = {}
+        prefs['profile.default_content_settings.popups'] = 0
+        prefs['download.default_directory'] = str(_download_base_path)
+        options.add_experimental_option('prefs', prefs)
+
     driver = webdriver.Chrome(options=options)
     driver.implicitly_wait(15)
 
@@ -113,7 +125,8 @@ def download_newspapers(*, limit: int):
             sleep(2)
             full_button.click()
 
-            LOGGER.debug(f'Downloading {file_path}...')
+            msg = f'Downloading {newspaper_date} newspaper to {file_path}…'
+            LOGGER.info(msg)
             for i in range(4):
                 if file_path.exists():
                     break
